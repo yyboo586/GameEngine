@@ -57,5 +57,11 @@ func (c *gameController) GetGameFavorite(ctx context.Context, req *v1.GetGameFav
 		return nil, err
 	}
 
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
+
 	return
 }

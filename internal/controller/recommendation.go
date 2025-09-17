@@ -2,6 +2,7 @@ package controller
 
 import (
 	v1 "GameEngine/api/v1"
+	"GameEngine/internal/model"
 	"GameEngine/internal/service"
 	"context"
 )
@@ -10,6 +11,32 @@ var RecommendationController = &recommendationController{}
 
 // recommendationController 推荐控制器
 type recommendationController struct{}
+
+// setUserGameStatus 为登录用户设置游戏状态（预约和收藏）
+func (c *recommendationController) setUserGameStatus(ctx context.Context, games []*v1.Game) error {
+	if value := ctx.Value(model.UserInfoKey); value != nil {
+		userID := value.(model.User).ID
+		for _, g := range games {
+			// 检查是否已预约
+			var isReserved bool
+			var err error
+			isReserved, err = service.Reservation().IsUserReserved(ctx, userID, g.ID)
+			if err != nil {
+				return err
+			}
+			g.IsReserve = isReserved
+
+			// 检查是否已收藏
+			var isFavorited bool
+			isFavorited, err = service.Game().IsUserFavorited(ctx, g.ID, userID)
+			if err != nil {
+				return err
+			}
+			g.IsFavorite = isFavorited
+		}
+	}
+	return nil
+}
 
 // GetTodayPicks 获取今日精选
 func (c *recommendationController) GetTodayPicks(ctx context.Context, req *v1.GetTodayPicksReq) (res *v1.GetTodayPicksRes, err error) {
@@ -22,6 +49,11 @@ func (c *recommendationController) GetTodayPicks(ctx context.Context, req *v1.Ge
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return nil, err
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +75,11 @@ func (c *recommendationController) GetSimilarGames(ctx context.Context, req *v1.
 	if err != nil {
 		return nil, err
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -57,6 +94,11 @@ func (c *recommendationController) GetRecommendationsByCategory(ctx context.Cont
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return nil, err
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +119,11 @@ func (c *recommendationController) GetRecommendationsByTags(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -94,6 +141,11 @@ func (c *recommendationController) GetPopularRecommendations(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -108,6 +160,11 @@ func (c *recommendationController) GetNewGameRecommendations(ctx context.Context
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return nil, err
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return nil, err
 	}

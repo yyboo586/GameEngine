@@ -33,6 +33,7 @@ func main() {
 	service.RegisterRecommendation(recommendation.NewRecommendation())
 	service.RegisterReservation(reservation.NewReservation())
 	service.RegisterUserBehavior(logics.NewUserBehavier())
+	service.RegisterMQ(service.NewMQ())
 
 	s.Group("/api/v1/game-engine", func(group *ghttp.RouterGroup) {
 		group.Middleware(CORS)

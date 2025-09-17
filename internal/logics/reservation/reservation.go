@@ -158,3 +158,41 @@ func (rl *Reservation) IsUserReserved(ctx context.Context, userID, gameID int64)
 	}
 	return exists, nil
 }
+
+// GetGameReservations 根据游戏ID获取预约用户列表
+func (rl *Reservation) GetGameReservations(ctx context.Context, gameID int64) (outs []*model.ReservationUser, err error) {
+	// 检查游戏是否存在
+	gameInfo, err := service.Game().GetGameByID(ctx, gameID)
+	if err != nil {
+		return nil, err
+	}
+	if gameInfo == nil {
+		return nil, fmt.Errorf("游戏不存在")
+	}
+
+	// 获取预约用户列表
+	var entities []*entity.GameReserve
+	err = dao.GameReserve.Ctx(ctx).
+		Where(dao.GameReserve.Columns().GameID, gameID).
+		OrderDesc(dao.GameReserve.Columns().CreateTime).
+		Scan(&entities)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entity := range entities {
+		outs = append(outs, rl.convertReservationEntityToModel(entity))
+	}
+
+	return
+}
+
+// convertReservationEntityToModel 转换预约实体到模型
+func (rl *Reservation) convertReservationEntityToModel(in *entity.GameReserve) *model.ReservationUser {
+	return &model.ReservationUser{
+		ID:          in.ID,
+		UserID:      in.UserID,
+		UserName:    fmt.Sprintf("用户%d", in.UserID), // 临时用户名，实际项目中应该关联用户表
+		ReserveTime: in.CreateTime.Format("2006-01-02 15:04:05"),
+	}
+}

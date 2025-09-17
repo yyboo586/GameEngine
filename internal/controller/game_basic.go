@@ -62,52 +62,13 @@ func (c *gameController) ListGame(ctx context.Context, req *v1.ListGameReq) (res
 	if err != nil {
 		return nil, err
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
-
-/*
-	func (c *gameController) ListGamesByCategoryName(ctx context.Context, req *v1.ListGamesByCategoryNameReq) (res *v1.ListGamesByCategoryNameRes, err error) {
-		gameIDs, err := service.Metadata().GetGameIDsByCategoryName(ctx, req.CategoryName)
-		if err != nil {
-			return nil, err
-		}
-
-		outs, err := service.Game().GetGamesByIDs(ctx, gameIDs)
-		if err != nil {
-			return nil, err
-		}
-
-		res = &v1.ListGamesByCategoryNameRes{
-			List: make([]*v1.Game, 0, len(outs)),
-		}
-		res.List, err = c.getGameDetails(ctx, outs)
-		if err != nil {
-			return nil, err
-		}
-		return
-	}
-
-	func (c *gameController) ListGamesByTagName(ctx context.Context, req *v1.ListGamesByTagNameReq) (res *v1.ListGamesByTagNameRes, err error) {
-		gameIDs, err := service.Metadata().GetGameIDsByTagName(ctx, req.TagName)
-		if err != nil {
-			return nil, err
-		}
-
-		outs, err := service.Game().GetGamesByIDs(ctx, gameIDs)
-		if err != nil {
-			return nil, err
-		}
-
-		res = &v1.ListGamesByTagNameRes{
-			List: make([]*v1.Game, 0, len(outs)),
-		}
-		res.List, err = c.getGameDetails(ctx, outs)
-		if err != nil {
-			return nil, err
-		}
-		return
-	}
-*/
 
 func (c *gameController) SearchGameByGameName(ctx context.Context, req *v1.SearchGameByGameNameReq) (res *v1.SearchGameByGameNameRes, err error) {
 	outs, _, err := service.Game().SearchGameByGameName(ctx, req.Name, req.Page, req.Size)
@@ -122,9 +83,14 @@ func (c *gameController) SearchGameByGameName(ctx context.Context, req *v1.Searc
 	if err != nil {
 		return nil, err
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return nil, err
+	}
 	value := ctx.Value(model.UserInfoKey)
 	if value != nil {
-		service.UserBehavior().RecordBehavior(ctx, value.(model.User).ID, 0, model.BehaviorSearch, "")
+		service.UserBehavior().RecordBehavior(ctx, value.(model.User).ID, 0, model.BehaviorSearch, "", req.Name)
 	}
 	return
 }

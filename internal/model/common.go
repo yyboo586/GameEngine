@@ -24,3 +24,11 @@ type User struct {
 	ID   int64  `json:"id" dc:"用户ID"`
 	Name string `json:"name" dc:"用户名"`
 }
+
+// ReservationUser 预约用户信息
+type ReservationUser struct {
+	ID          int64  `json:"id" dc:"预约记录ID"`
+	UserID      int64  `json:"user_id" dc:"用户ID"`
+	UserName    string `json:"user_name" dc:"用户名"`
+	ReserveTime string `json:"reserve_time" dc:"预约时间"`
+}

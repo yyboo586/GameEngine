@@ -48,6 +48,7 @@ type IGame interface {
 	AddFavorite(ctx context.Context, gameID, userID int64) error
 	RemoveFavorite(ctx context.Context, gameID, userID int64) error
 	GetUserFavorites(ctx context.Context, userID int64, pageReq *model.PageReq) (out []*model.Game, pageRes *model.PageRes, err error)
+	IsUserFavorited(ctx context.Context, gameID, userID int64) (bool, error)
 
 	// 游戏评分
 	AddRating(ctx context.Context, gameID, userID int64, rating int) error

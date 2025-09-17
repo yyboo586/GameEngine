@@ -80,7 +80,7 @@ func (c *gameController) PreDownloadMediaInfo(ctx context.Context, req *v1.PreDo
 		return nil, err
 	}
 
-	service.UserBehavior().RecordBehavior(ctx, userInfo.ID, req.GameID, model.BehaviorDownload, "")
+	service.UserBehavior().RecordBehavior(ctx, userInfo.ID, req.GameID, model.BehaviorDownload, "", "download")
 
 	res = &v1.PreDownloadMediaInfoRes{
 		DownloadURL: out.DownloadURL,

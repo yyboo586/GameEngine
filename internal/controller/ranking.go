@@ -2,6 +2,7 @@ package controller
 
 import (
 	v1 "GameEngine/api/v1"
+	"GameEngine/internal/model"
 	"GameEngine/internal/service"
 	"context"
 )
@@ -10,6 +11,32 @@ var RankingController = &rankingController{}
 
 // rankingController 榜单控制器
 type rankingController struct{}
+
+// setUserGameStatus 为登录用户设置游戏状态（预约和收藏）
+func (c *rankingController) setUserGameStatus(ctx context.Context, games []*v1.Game) error {
+	if value := ctx.Value(model.UserInfoKey); value != nil {
+		userID := value.(model.User).ID
+		for _, g := range games {
+			// 检查是否已预约
+			var isReserved bool
+			var err error
+			isReserved, err = service.Reservation().IsUserReserved(ctx, userID, g.ID)
+			if err != nil {
+				return err
+			}
+			g.IsReserve = isReserved
+
+			// 检查是否已收藏
+			var isFavorited bool
+			isFavorited, err = service.Game().IsUserFavorited(ctx, g.ID, userID)
+			if err != nil {
+				return err
+			}
+			g.IsFavorite = isFavorited
+		}
+	}
+	return nil
+}
 
 // GetHotGames 获取热门游戏榜单
 func (c *rankingController) GetHotGames(ctx context.Context, req *v1.GetHotGamesReq) (res *v1.GetHotGamesRes, err error) {
@@ -23,6 +50,11 @@ func (c *rankingController) GetHotGames(ctx context.Context, req *v1.GetHotGames
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return
 	}
@@ -44,6 +76,11 @@ func (c *rankingController) GetThisMonthNewGames(ctx context.Context, req *v1.Ge
 	if err != nil {
 		return
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -59,6 +96,11 @@ func (c *reservationController) GetUpcomingGames(ctx context.Context, req *v1.Ge
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return
 	}
@@ -80,6 +122,11 @@ func (c *rankingController) GetCategoryRanking(ctx context.Context, req *v1.GetC
 	if err != nil {
 		return
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -95,6 +142,11 @@ func (c *rankingController) GetTagRanking(ctx context.Context, req *v1.GetTagRan
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return
 	}
@@ -116,6 +168,11 @@ func (c *rankingController) GetComprehensiveRanking(ctx context.Context, req *v1
 	if err != nil {
 		return
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -131,6 +188,11 @@ func (c *rankingController) GetTopRatedGames(ctx context.Context, req *v1.GetTop
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return
 	}
@@ -153,6 +215,11 @@ func (c *rankingController) GetMostDownloadedGames(ctx context.Context, req *v1.
 	if err != nil {
 		return
 	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -168,6 +235,11 @@ func (c *rankingController) GetMostFavoritedGames(ctx context.Context, req *v1.G
 		PageRes: pageRes,
 	}
 	res.List, err = GameController.getGameDetails(ctx, games)
+	if err != nil {
+		return
+	}
+	// 登录用户：补充是否已预约和是否已收藏标记
+	err = c.setUserGameStatus(ctx, res.List)
 	if err != nil {
 		return
 	}

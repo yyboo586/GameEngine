@@ -27,12 +27,20 @@ func (m *metadata) CreateCategory(ctx context.Context, name string) (id int64, e
 }
 
 func (m *metadata) DeleteCategory(ctx context.Context, id int64) (err error) {
+	if err = m.AssertCategoryExists(ctx, id); err != nil {
+		return
+	}
+
 	_, err = dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Delete()
 
 	return
 }
 
 func (m *metadata) UpdateCategory(ctx context.Context, id int64, name string) (err error) {
+	if err = m.AssertCategoryExists(ctx, id); err != nil {
+		return
+	}
+
 	dataUpdate := map[string]interface{}{
 		dao.Category.Columns().Name: name,
 	}
@@ -53,7 +61,7 @@ func (m *metadata) GetCategoryByID(ctx context.Context, id int64) (out *model.Ca
 	err = dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Scan(&category)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, fmt.Errorf("分类不存在, id: %d", id)
 		}
 		return
 	}
@@ -74,5 +82,16 @@ func (m *metadata) ListCategory(ctx context.Context) (outs []*model.Category, er
 		outs = append(outs, model.ConvertCategoryEntityToModel(category))
 	}
 
+	return
+}
+
+func (m *metadata) AssertCategoryExists(ctx context.Context, id int64) (err error) {
+	categoryInfo, err := m.GetCategoryByID(ctx, id)
+	if err != nil {
+		return
+	}
+	if categoryInfo == nil {
+		return fmt.Errorf("分类不存在, id: %d", id)
+	}
 	return
 }

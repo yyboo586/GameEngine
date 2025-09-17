@@ -7,11 +7,14 @@ import (
 
 // IUserBehavior 用户行为服务接口
 type IUserBehavior interface {
-	RecordBehavior(ctx context.Context, userID, gameID int64, behaviorType model.BehaviorType, ipAddress string) error
+	RecordBehavior(ctx context.Context, userID, gameID int64, behaviorType model.BehaviorType, ipAddress string, searchKeyword string) error
 
 	// 搜索历史管理
 	GetSearchHistory(ctx context.Context, userID int64, pageReq *model.PageReq) ([]*model.UserBehavior, *model.PageRes, error)
 	ClearSearchHistory(ctx context.Context, userID int64) error
+
+	// 玩过游戏历史管理
+	GetPlayHistory(ctx context.Context, userID int64, pageReq *model.PageReq) ([]*model.UserBehavior, *model.PageRes, error)
 }
 
 var localUserBehavior IUserBehavior

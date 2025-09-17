@@ -5,6 +5,7 @@ import (
 	"GameEngine/internal/model"
 	"GameEngine/internal/model/entity"
 	"context"
+	"fmt"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -55,6 +56,7 @@ func (gg *Game) RemoveFavorite(ctx context.Context, gameID, userID int64) (err e
 		return
 	}
 	if !exists {
+		err = fmt.Errorf("没有收藏过该游戏，无法取消收藏")
 		return // 没有收藏过
 	}
 
@@ -99,6 +101,10 @@ func (gg *Game) GetUserFavorites(ctx context.Context, userID int64, pageReq *mod
 		out = append(out, model.ConvertGameEntityToModel(entity))
 	}
 	return
+}
+
+func (gg *Game) IsUserFavorited(ctx context.Context, gameID, userID int64) (bool, error) {
+	return gg.checkFavoriteExists(ctx, gameID, userID)
 }
 
 func (gg *Game) checkFavoriteExists(ctx context.Context, gameID, userID int64) (exists bool, err error) {

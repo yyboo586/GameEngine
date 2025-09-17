@@ -9,7 +9,7 @@ import (
 
 // GetSearchHistoryReq 获取搜索历史请求
 type GetSearchHistoryReq struct {
-	g.Meta `path:"/games/search-history" method:"get" tags:"Game Management/User Behavior" summary:"获取搜索历史"`
+	g.Meta `path:"/games/search-history" method:"get" tags:"Game Management/User Behavior" summary:"Game Search History"`
 	model.PageReq
 }
 
@@ -32,25 +32,12 @@ type SearchHistoryItem struct {
 
 // ClearSearchHistoryReq 清空搜索历史请求
 type ClearSearchHistoryReq struct {
-	g.Meta `path:"/games/search-history" method:"delete" tags:"Game Management/User Behavior" summary:"清空搜索历史"`
+	g.Meta `path:"/games/search-history" method:"delete" tags:"Game Management/User Behavior" summary:"Clear Game Search History"`
 }
 
 // ClearSearchHistoryRes 清空搜索历史响应
 type ClearSearchHistoryRes struct {
 	g.Meta `mime:"application/json"`
-}
-
-// GetGameHistoryReq 获取游戏历史请求
-type GetGameHistoryReq struct {
-	g.Meta `path:"/game-history" method:"get" tags:"游戏历史" summary:"获取游戏历史"`
-	UserID int64 `json:"user_id" v:"required" dc:"用户ID"`
-	Limit  int   `json:"limit" dc:"返回数量限制，默认50"`
-}
-
-// GetGameHistoryRes 获取游戏历史响应
-type GetGameHistoryRes struct {
-	List  []*GameHistoryItem `json:"list" dc:"游戏历史列表"`
-	Total int                `json:"total" dc:"总数"`
 }
 
 // GameHistoryItem 游戏历史项
@@ -61,4 +48,42 @@ type GameHistoryItem struct {
 	BehaviorType int    `json:"behavior_type" dc:"行为类型"`
 	BehaviorTime string `json:"behavior_time" dc:"行为时间"`
 	IPAddress    string `json:"ip_address" dc:"IP地址"`
+}
+
+// PlayGameReq 玩游戏请求
+type PlayGameReq struct {
+	g.Meta `path:"/games/{game_id}/play" method:"post" tags:"Game Management/User Behavior" summary:"Play Game"`
+	GameID int64 `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
+}
+
+// PlayGameRes 玩游戏响应
+type PlayGameRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+// GetPlayHistoryReq 获取玩过游戏历史记录请求
+type GetPlayHistoryReq struct {
+	g.Meta `path:"/games/play-history" method:"get" tags:"Game Management/User Behavior" summary:"Get Play History"`
+	model.PageReq
+}
+
+// GetPlayHistoryRes 获取玩过游戏历史记录响应
+type GetPlayHistoryRes struct {
+	g.Meta  `mime:"application/json"`
+	List    []*PlayHistoryItem `json:"list" dc:"玩过游戏历史列表"`
+	PageRes *model.PageRes     `json:"page_res" dc:"分页信息"`
+}
+
+// PlayHistoryItem 玩过游戏历史项
+type PlayHistoryItem struct {
+	ID          int64       `json:"id" dc:"ID"`
+	GameID      int64       `json:"game_id" dc:"游戏ID"`
+	GameName    string      `json:"game_name" dc:"游戏名称"`
+	Developer   string      `json:"developer" dc:"开发商"`
+	Publisher   string      `json:"publisher" dc:"发行商"`
+	Description string      `json:"description" dc:"游戏描述"`
+	PlayTime    *gtime.Time `json:"play_time" dc:"游玩时间"`
+	IPAddress   string      `json:"ip_address" dc:"IP地址"`
+	IsFavorite  bool        `json:"is_favorite" dc:"是否收藏"`
+	IsReserve   bool        `json:"is_reserve" dc:"是否预约"`
 }

@@ -18,6 +18,9 @@ type IReservation interface {
 
 	// 检查用户是否已预约
 	IsUserReserved(ctx context.Context, userID, gameID int64) (bool, error)
+
+	// 根据游戏ID获取预约用户列表
+	GetGameReservations(ctx context.Context, gameID int64) (outs []*model.ReservationUser, err error)
 }
 
 var localReservation IReservation

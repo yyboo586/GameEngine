@@ -27,12 +27,20 @@ func (m *metadata) CreateTag(ctx context.Context, name string) (id int64, err er
 }
 
 func (m *metadata) DeleteTag(ctx context.Context, id int64) (err error) {
+	if err = m.AssertTagExists(ctx, id); err != nil {
+		return
+	}
+
 	_, err = dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Delete()
 
 	return
 }
 
 func (m *metadata) UpdateTag(ctx context.Context, id int64, name string) (err error) {
+	if err = m.AssertTagExists(ctx, id); err != nil {
+		return
+	}
+
 	dataUpdate := map[string]interface{}{
 		dao.Tag.Columns().Name: name,
 	}
@@ -53,7 +61,7 @@ func (m *metadata) GetTagByID(ctx context.Context, id int64) (out *model.Tag, er
 	err = dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Scan(&tag)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, fmt.Errorf("标签不存在, id: %d", id)
 		}
 		return
 	}
@@ -72,6 +80,17 @@ func (m *metadata) ListTag(ctx context.Context) (outs []*model.Tag, err error) {
 	outs = make([]*model.Tag, 0, len(tags))
 	for _, tag := range tags {
 		outs = append(outs, model.ConvertTagEntityToModel(tag))
+	}
+	return
+}
+
+func (m *metadata) AssertTagExists(ctx context.Context, id int64) (err error) {
+	tagInfo, err := m.GetTagByID(ctx, id)
+	if err != nil {
+		return
+	}
+	if tagInfo == nil {
+		return fmt.Errorf("标签不存在, id: %d", id)
 	}
 	return
 }

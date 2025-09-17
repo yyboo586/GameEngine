@@ -110,4 +110,7 @@ type Game struct {
 	UpdateTime *gtime.Time `json:"update_time" dc:"更新时间"`
 
 	MediaInfos []*GameMediaInfo `json:"media_infos" dc:"游戏媒体信息"`
+
+	IsFavorite bool `json:"is_favorite" dc:"是否收藏"`
+	IsReserve  bool `json:"is_reserve" dc:"是否预约"`
 }

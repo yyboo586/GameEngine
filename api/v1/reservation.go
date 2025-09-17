@@ -57,3 +57,25 @@ type IsUserReservedRes struct {
 	g.Meta     `mime:"application/json"`
 	IsReserved bool `json:"is_reserved" dc:"是否已预约"`
 }
+
+// GetGameReservationsReq 根据游戏ID获取预约用户列表请求
+type GetGameReservationsReq struct {
+	g.Meta `path:"/games/{game_id}/reservations" method:"get" tags:"Game Management/Reservation" summary:"Get Game Reservations"`
+	GameID int64 `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
+	model.PageReq
+}
+
+// GetGameReservationsRes 根据游戏ID获取预约用户列表响应
+type GetGameReservationsRes struct {
+	g.Meta  `mime:"application/json"`
+	List    []*ReservationUser `json:"list" dc:"预约用户列表"`
+	PageRes *model.PageRes     `json:"page_res" dc:"分页信息"`
+}
+
+// ReservationUser 预约用户信息
+type ReservationUser struct {
+	ID          int64  `json:"id" dc:"预约记录ID"`
+	UserID      string `json:"user_id" dc:"用户ID"`
+	UserName    string `json:"user_name" dc:"用户名"`
+	ReserveTime string `json:"reserve_time" dc:"预约时间"`
+}
