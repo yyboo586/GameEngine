@@ -110,23 +110,16 @@ func (c *userBehavierController) GetPlayHistory(ctx context.Context, req *v1.Get
 
 	// 获取游戏详情并转换为响应格式
 	for _, behavior := range behaviors {
-		game, err := service.Game().GetGameByID(ctx, behavior.GameID)
+		result, err := GameController.GetGameByID(ctx, &v1.GetGameByIDReq{ID: behavior.GameID})
 		if err != nil {
 			return nil, err
 		}
-		if game == nil {
+		if result == nil {
 			continue // 游戏不存在，跳过
 		}
 
 		item := &v1.PlayHistoryItem{
-			ID:          behavior.ID,
-			GameID:      behavior.GameID,
-			GameName:    game.Name,
-			Developer:   game.Developer,
-			Publisher:   game.Publisher,
-			Description: game.Description,
-			PlayTime:    behavior.BehaviorTime,
-			IPAddress:   behavior.IPAddress,
+			Game: result.Game,
 		}
 
 		// 检查是否已收藏

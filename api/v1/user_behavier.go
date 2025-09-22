@@ -76,14 +76,7 @@ type GetPlayHistoryRes struct {
 
 // PlayHistoryItem 玩过游戏历史项
 type PlayHistoryItem struct {
-	ID          int64       `json:"id" dc:"ID"`
-	GameID      int64       `json:"game_id" dc:"游戏ID"`
-	GameName    string      `json:"game_name" dc:"游戏名称"`
-	Developer   string      `json:"developer" dc:"开发商"`
-	Publisher   string      `json:"publisher" dc:"发行商"`
-	Description string      `json:"description" dc:"游戏描述"`
-	PlayTime    *gtime.Time `json:"play_time" dc:"游玩时间"`
-	IPAddress   string      `json:"ip_address" dc:"IP地址"`
-	IsFavorite  bool        `json:"is_favorite" dc:"是否收藏"`
-	IsReserve   bool        `json:"is_reserve" dc:"是否预约"`
+	*Game
+	PlayTime  *gtime.Time `json:"play_time" dc:"游玩时间"`
+	IPAddress string      `json:"ip_address" dc:"IP地址"`
 }
