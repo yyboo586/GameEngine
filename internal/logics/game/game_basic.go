@@ -8,11 +8,16 @@ import (
 	"GameEngine/internal/service"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+)
+
+var (
+	ErrGameNotFound = errors.New("游戏不存在")
 )
 
 func (gg *Game) CreateGame(ctx context.Context, in *v1.CreateGameReq) (id int64, err error) {
@@ -55,6 +60,13 @@ func (gg *Game) CreateGame(ctx context.Context, in *v1.CreateGameReq) (id int64,
 	return
 }
 
+// 1、删除游戏
+// 2、删除游戏分类关联
+// 3、删除游戏标签关联
+// 4、删除游戏评分
+// 5、删除游戏收藏
+// 6、删除游戏预约
+// 4、删除游戏媒体关联（TODO: 基于异步任务队列）
 func (gg *Game) DeleteGame(ctx context.Context, id int64) (err error) {
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		_, err = dao.Game.Ctx(ctx).TX(tx).Where(dao.Game.Columns().ID, id).Delete()
@@ -156,7 +168,7 @@ func (gg *Game) GetGameByID(ctx context.Context, id int64) (out *model.Game, err
 	err = dao.Game.Ctx(ctx).Where(dao.Game.Columns().ID, id).Scan(&entity)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, ErrGameNotFound
 		}
 		return
 	}
@@ -187,6 +199,10 @@ func (gg *Game) ListGame(ctx context.Context, in *v1.ListGameReq) (outs []*model
 	}
 
 	query := dao.Game.Ctx(ctx)
+
+	if in.Name != "" {
+		query = query.WhereLike(dao.Game.Columns().Name, in.Name+"%")
+	}
 
 	total, err := query.Count()
 	if err != nil {

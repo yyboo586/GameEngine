@@ -5,12 +5,14 @@ import (
 	"GameEngine/internal/model"
 	"GameEngine/internal/model/entity"
 	"context"
+	"fmt"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
 // 游戏媒体信息相关方法
+// TODO: 游戏图标应该只有一个。
 func (gg *Game) AddMediaInfo(ctx context.Context, mediaInfo *model.GameMediaInfo) (err error) {
 	_, err = dao.GameMediaInfo.Ctx(ctx).Data(map[string]interface{}{
 		dao.GameMediaInfo.Columns().GameID:    mediaInfo.GameID,
@@ -109,6 +111,82 @@ func (gg *Game) GetMediaInfo(ctx context.Context, gameID int64) (out []*model.Ga
 		out = append(out, gg.convertMediaInfoEntityToModel(entity))
 	}
 	return
+}
+
+func (gg *Game) CheckMediaInfo(ctx context.Context, gameInfo *model.Game) (err error) {
+	var exists bool
+	exists, err = dao.GameMediaInfo.Ctx(ctx).
+		Where(dao.GameMediaInfo.Columns().GameID, gameInfo.ID).
+		Where(dao.GameMediaInfo.Columns().MediaType, model.GameMediaTypeIcon).
+		Exist()
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("图标媒体文件不存在")
+	}
+
+	exists, err = dao.GameMediaInfo.Ctx(ctx).
+		Where(dao.GameMediaInfo.Columns().GameID, gameInfo.ID).
+		Where(dao.GameMediaInfo.Columns().MediaType, model.GameMediaTypeScreenshot).
+		Exist()
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("截图媒体文件不存在")
+	}
+
+	exists, err = dao.GameMediaInfo.Ctx(ctx).
+		Where(dao.GameMediaInfo.Columns().GameID, gameInfo.ID).
+		Where(dao.GameMediaInfo.Columns().MediaType, model.GameMediaTypeVideo).
+		Exist()
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("视频媒体文件不存在")
+	}
+	if !exists {
+		return fmt.Errorf("视频媒体文件不存在")
+	}
+
+	switch gameInfo.DistributeType {
+	case model.GameDistributeTypeAPK:
+		exists, err = dao.GameMediaInfo.Ctx(ctx).
+			Where(dao.GameMediaInfo.Columns().GameID, gameInfo.ID).
+			Where(dao.GameMediaInfo.Columns().MediaType, model.GameMediaTypeApkFile).
+			Exist()
+		if !exists {
+			return fmt.Errorf("APK媒体文件不存在")
+		}
+	case model.GameDistributeTypeLink:
+		exists, err = dao.GameMediaInfo.Ctx(ctx).
+			Where(dao.GameMediaInfo.Columns().GameID, gameInfo.ID).
+			Where(dao.GameMediaInfo.Columns().MediaType, model.GameMediaTypeH5Link).
+			Exist()
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return fmt.Errorf("H5链接媒体文件不存在")
+		}
+	}
+
+	return nil
+}
+
+// SetH5Link 设置H5链接
+func (gg *Game) SetH5Link(ctx context.Context, gameID int64, link string) error {
+	_, err := dao.GameMediaInfo.Ctx(ctx).
+		Data(map[string]interface{}{
+			dao.GameMediaInfo.Columns().GameID:    gameID,
+			dao.GameMediaInfo.Columns().FileID:    "",
+			dao.GameMediaInfo.Columns().MediaType: model.GameMediaTypeH5Link,
+			dao.GameMediaInfo.Columns().MediaUrl:  link,
+			dao.GameMediaInfo.Columns().Status:    model.GameMediaStatusSuccess,
+		}).Insert()
+	return err
 }
 
 func (gg *Game) convertMediaInfoEntityToModel(in *entity.GameMediaInfo) (out *model.GameMediaInfo) {

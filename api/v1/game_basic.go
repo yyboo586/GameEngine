@@ -9,7 +9,7 @@ import (
 
 type CreateGameReq struct {
 	g.Meta `path:"/games" method:"post" tags:"Game Management" summary:"Create Game"`
-	model.Author
+	model.AuthorRequired
 	Name           string  `json:"name" v:"required|length:1,30#游戏名称不能为空|游戏名称长度不能超过30个字符" dc:"游戏名称"`
 	DistributeType int     `json:"distribute_type" v:"required#游戏分发类型不能为空" dc:"游戏分发类型(1:APK,2:H5)"`
 	CategoryID     int64   `json:"category_id" v:"required#游戏分类不能为空" dc:"游戏分类"`
@@ -27,7 +27,7 @@ type CreateGameRes struct {
 
 type DeleteGameReq struct {
 	g.Meta `path:"/games/{id}" method:"delete" tags:"Game Management" summary:"Delete Game"`
-	model.Author
+	model.AuthorRequired
 	ID int64 `p:"id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 }
 
@@ -37,7 +37,7 @@ type DeleteGameRes struct {
 
 type UpdateGameReq struct {
 	g.Meta `path:"/games/{id}" method:"put" tags:"Game Management" summary:"Update Game"`
-	model.Author
+	model.AuthorRequired
 	ID             int64   `p:"id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	Name           string  `json:"name" v:"length:1,30#游戏名称长度不能超过30个字符" dc:"游戏名称"`
 	DistributeType int     `json:"distribute_type" v:"in:1,2#游戏分发类型必须是1,2" dc:"游戏分发类型(1:APK,2:H5)"`
@@ -66,6 +66,7 @@ type GetGameByIDRes struct {
 type ListGameReq struct {
 	g.Meta `path:"/games" method:"get" tags:"Game Management" summary:"List Game"`
 	model.PageReq
+	Name string `json:"name" dc:"游戏名称"`
 }
 
 type ListGameRes struct {
@@ -88,7 +89,7 @@ type SearchGameByGameNameRes struct {
 type Game struct {
 	ID             int64         `json:"id" dc:"游戏ID"`
 	Name           string        `json:"name" dc:"游戏名称"`
-	DistributeType int           `json:"distribute_type" dc:"游戏分发类型"`
+	DistributeType string        `json:"distribute_type" dc:"游戏分发类型"`
 	Category       *CategoryInfo `json:"category" dc:"游戏分类"`
 	Tags           []*TagInfo    `json:"tags" dc:"游戏标签"`
 	Developer      string        `json:"developer" dc:"游戏开发者"`
@@ -96,7 +97,7 @@ type Game struct {
 	Description    string        `json:"description" dc:"游戏描述"`
 	Details        string        `json:"details" dc:"游戏详情"`
 
-	Status       int         `json:"status" dc:"游戏状态(1:未上架 2:已上架 3:已下架)"`
+	Status       string      `json:"status" dc:"游戏状态"`
 	PublishTime  *gtime.Time `json:"publish_time" dc:"发布时间"`
 	ReserveCount int64       `json:"reserve_count" dc:"预约次数"`
 

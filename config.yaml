@@ -8,8 +8,9 @@ server:
   NameToUriType: 3
   maxHeaderBytes: "20KB"
   clientMaxBodySize: "50MB"
-  adminService:
-    address: "http://124.221.243.128:9900"
+  thirdService:
+    adminService: "http://127.0.0.1:9900"
+    fileEngineService: "http://127.0.0.1:9700"
 
 logger:
   level: "debug"

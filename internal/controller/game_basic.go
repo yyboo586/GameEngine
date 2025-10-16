@@ -35,9 +35,6 @@ func (c *gameController) GetGameByID(ctx context.Context, req *v1.GetGameByIDReq
 	if err != nil {
 		return
 	}
-	if out == nil {
-		return
-	}
 
 	res = &v1.GetGameByIDRes{}
 	tmps, err := c.getGameDetails(ctx, []*model.Game{out})
@@ -137,13 +134,13 @@ func (c *gameController) convertModelToResponse(in *model.Game) (out *v1.Game) {
 	out = &v1.Game{
 		ID:             in.ID,
 		Name:           in.Name,
-		DistributeType: int(in.DistributeType),
+		DistributeType: model.GetGameDistributeTypeText(in.DistributeType),
 		Developer:      in.Developer,
 		Publisher:      in.Publisher,
 		Description:    in.Description,
 		Details:        in.Details,
 
-		Status:       int(in.Status),
+		Status:       model.GetGameStatusText(in.Status),
 		PublishTime:  in.PublishTime,
 		ReserveCount: in.ReserveCount,
 

@@ -73,10 +73,6 @@ func (c *userBehavierController) PlayGame(ctx context.Context, req *v1.PlayGameR
 		return nil, err
 	}
 
-	if gameInfo == nil {
-		return nil, fmt.Errorf("游戏不存在")
-	}
-
 	if gameInfo.Status != model.GameStatusPublished {
 		return nil, fmt.Errorf("游戏未发布")
 	}
@@ -113,9 +109,6 @@ func (c *userBehavierController) GetPlayHistory(ctx context.Context, req *v1.Get
 		result, err := GameController.GetGameByID(ctx, &v1.GetGameByIDReq{ID: behavior.GameID})
 		if err != nil {
 			return nil, err
-		}
-		if result == nil {
-			continue // 游戏不存在，跳过
 		}
 
 		item := &v1.PlayHistoryItem{

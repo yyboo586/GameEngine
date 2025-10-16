@@ -23,6 +23,7 @@ const (
 	GameMediaTypeScreenshot               // 截图
 	GameMediaTypeVideo                    // 视频
 	GameMediaTypeApkFile                  // APK文件
+	GameMediaTypeH5Link                   // 链接
 )
 
 type GameMediaStatus int
@@ -45,6 +46,49 @@ const (
 	GameStatusUnpublished                   // 已下架
 )
 
+type GameEvent int
+
+const (
+	SubmitForReview   GameEvent = iota // 提交审核
+	Approve                            // 审核通过
+	Reject                             // 审核失败
+	PreRegister                        // 预约发布
+	PublishNow                         // 立即发布
+	UpdateInfo                         // 更新游戏信息
+	CancelPreRegister                  // 取消预约发布
+	UnpublishNow                       // 立即下架
+	UpdateVersion                      // 更新游戏版本
+	AutoPublish                        // 自动发布(预约时间到达)
+)
+
+// 获取事件名称
+func GetGameEventText(event GameEvent) string {
+	switch event {
+	case SubmitForReview:
+		return "提交审核"
+	case Approve:
+		return "审核通过"
+	case Reject:
+		return "审核失败"
+	case PreRegister:
+		return "预约发布"
+	case PublishNow:
+		return "立即发布"
+	case UpdateInfo:
+		return "更新游戏信息"
+	case CancelPreRegister:
+		return "取消预约发布"
+	case UnpublishNow:
+		return "立即下架"
+	case UpdateVersion:
+		return "更新游戏版本"
+	case AutoPublish:
+		return "自动发布"
+	default:
+		return "未知事件"
+	}
+}
+
 // 获取状态名称
 func GetGameStatusText(status GameStatus) string {
 	switch status {
@@ -63,6 +107,16 @@ func GetGameStatusText(status GameStatus) string {
 	default:
 		return "未知状态"
 	}
+}
+
+func GetGameDistributeTypeText(distributeType GameDistributeType) string {
+	switch distributeType {
+	case GameDistributeTypeAPK:
+		return "APK"
+	case GameDistributeTypeLink:
+		return "H5"
+	}
+	return "未知类型"
 }
 
 type Game struct {
@@ -84,6 +138,7 @@ type Game struct {
 	FavoriteCount int64   `json:"favorite_count" dc:"收藏次数"`
 	DownloadCount int64   `json:"download_count" dc:"下载次数"`
 
+	Version    int         `json:"version" dc:"版本"`
 	CreateTime *gtime.Time `json:"create_time" dc:"创建时间"`
 	UpdateTime *gtime.Time `json:"update_time" dc:"更新时间"`
 }
@@ -118,6 +173,7 @@ func ConvertGameEntityToModel(in *entity.Game) (out *Game) {
 		FavoriteCount: in.FavoriteCount,
 		DownloadCount: in.DownloadCount,
 
+		Version:    in.Version,
 		CreateTime: in.CreateTime,
 		UpdateTime: in.UpdateTime,
 	}

@@ -6,8 +6,14 @@ import (
 	"GameEngine/internal/model/entity"
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"strings"
+)
+
+var (
+	ErrTagExists      = errors.New("标签已存在")
+	ErrTagNotExists   = errors.New("标签不存在")
+	ErrTagHasGameByID = errors.New("该标签有关联的游戏，无法删除")
 )
 
 func (m *metadata) CreateTag(ctx context.Context, name string) (id int64, err error) {
@@ -18,7 +24,7 @@ func (m *metadata) CreateTag(ctx context.Context, name string) (id int64, err er
 	id, err = dao.Tag.Ctx(ctx).Data(dataInsert).InsertAndGetId()
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			err = fmt.Errorf("标签名称已存在, name: %s", name)
+			err = ErrTagExists
 		}
 		return
 	}
@@ -29,6 +35,14 @@ func (m *metadata) CreateTag(ctx context.Context, name string) (id int64, err er
 func (m *metadata) DeleteTag(ctx context.Context, id int64) (err error) {
 	if err = m.AssertTagExists(ctx, id); err != nil {
 		return
+	}
+
+	exists, err := m.IsTagHasGame(ctx, id)
+	if err != nil {
+		return
+	}
+	if exists {
+		return ErrTagHasGameByID
 	}
 
 	_, err = dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Delete()
@@ -48,7 +62,7 @@ func (m *metadata) UpdateTag(ctx context.Context, id int64, name string) (err er
 	_, err = dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Data(dataUpdate).Update()
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			err = fmt.Errorf("标签名称已存在, name: %s", name)
+			err = ErrTagExists
 		}
 		return
 	}
@@ -61,7 +75,7 @@ func (m *metadata) GetTagByID(ctx context.Context, id int64) (out *model.Tag, er
 	err = dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Scan(&tag)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("标签不存在, id: %d", id)
+			return nil, ErrTagNotExists
 		}
 		return
 	}
@@ -70,9 +84,13 @@ func (m *metadata) GetTagByID(ctx context.Context, id int64) (out *model.Tag, er
 	return
 }
 
-func (m *metadata) ListTag(ctx context.Context) (outs []*model.Tag, err error) {
+func (m *metadata) SearchTag(ctx context.Context, name string) (outs []*model.Tag, err error) {
 	var tags []*entity.Tag
-	err = dao.Tag.Ctx(ctx).Scan(&tags)
+	if name == "" {
+		err = dao.Tag.Ctx(ctx).Scan(&tags)
+	} else {
+		err = dao.Tag.Ctx(ctx).WhereLike(dao.Tag.Columns().Name, name+"%").Scan(&tags)
+	}
 	if err != nil {
 		return
 	}
@@ -85,12 +103,12 @@ func (m *metadata) ListTag(ctx context.Context) (outs []*model.Tag, err error) {
 }
 
 func (m *metadata) AssertTagExists(ctx context.Context, id int64) (err error) {
-	tagInfo, err := m.GetTagByID(ctx, id)
+	exists, err := dao.Tag.Ctx(ctx).Where(dao.Tag.Columns().ID, id).Exist()
 	if err != nil {
 		return
 	}
-	if tagInfo == nil {
-		return fmt.Errorf("标签不存在, id: %d", id)
+	if !exists {
+		return ErrTagNotExists
 	}
 	return
 }

@@ -11,7 +11,7 @@ import (
 // ReserveGameReq 游戏预约请求
 type ReserveGameReq struct {
 	g.Meta `path:"/games/{game_id}/reserve" method:"post" tags:"Game Management/Reservation" summary:"Reserve Game"`
-	model.Author
+	model.AuthorRequired
 	GameID int64 `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 }
 
@@ -23,7 +23,7 @@ type ReserveGameRes struct {
 // CancelReservationReq 取消预约请求
 type CancelReservationReq struct {
 	g.Meta `path:"/games/{game_id}/reserve" method:"delete" tags:"Game Management/Reservation" summary:"Cancel Reservation"`
-	model.Author
+	model.AuthorRequired
 	GameID int64 `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 }
 
@@ -35,7 +35,7 @@ type CancelReservationRes struct {
 // GetUserReservationsReq 获取用户预约列表请求
 type GetUserReservationsReq struct {
 	g.Meta `path:"/games/reservations" method:"get" tags:"Game Management/Reservation" summary:"Get User Reservations"`
-	model.Author
+	model.AuthorRequired
 	model.PageReq
 }
 

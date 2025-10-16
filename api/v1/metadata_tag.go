@@ -10,7 +10,7 @@ import (
 // CreateTagReq 创建标签请求
 type CreateTagReq struct {
 	g.Meta `path:"/tags" method:"post" tags:"Metadata/Tag" summary:"Create Tag"`
-	model.Author
+	model.AuthorRequired
 	Name string `json:"name" v:"required|length:1,6#标签名称不能为空|标签名称长度不能超过6个字符" dc:"标签名称"`
 }
 
@@ -23,7 +23,7 @@ type CreateTagRes struct {
 // DeleteTagReq 删除标签请求
 type DeleteTagReq struct {
 	g.Meta `path:"/tags/{id}" method:"delete" tags:"Metadata/Tag" summary:"Delete Tag"`
-	model.Author
+	model.AuthorRequired
 	ID int64 `p:"id" v:"required#标签ID不能为空" dc:"标签ID"`
 }
 
@@ -35,7 +35,7 @@ type DeleteTagRes struct {
 // UpdateTagReq 更新标签请求
 type UpdateTagReq struct {
 	g.Meta `path:"/tags/{id}" method:"put" tags:"Metadata/Tag" summary:"Update Tag"`
-	model.Author
+	model.AuthorRequired
 	ID   int64  `p:"id" v:"required#标签ID不能为空" dc:"标签ID"`
 	Name string `json:"name" v:"required|length:1,6#标签名称不能为空|标签名称长度不能超过6个字符" dc:"标签名称"`
 }
@@ -48,7 +48,7 @@ type UpdateTagRes struct {
 // GetTagReq 获取标签请求
 type GetTagReq struct {
 	g.Meta `path:"/tags/{id}" method:"get" tags:"Metadata/Tag" summary:"Get Tag"`
-	model.Author
+	model.AuthorRequired
 	ID int64 `p:"id" v:"required#标签ID不能为空" dc:"标签ID"`
 }
 
@@ -58,16 +58,18 @@ type GetTagRes struct {
 	*TagInfo
 }
 
-// GetTagListReq 获取标签列表请求
-type GetTagListReq struct {
-	g.Meta `path:"/tags" method:"get" tags:"Metadata/Tag" summary:"Get Tag List"`
-	model.Author
+// SearchTagReq 搜索标签请求
+type SearchTagReq struct {
+	g.Meta `path:"/tags" method:"get" tags:"Metadata/Tag" summary:"Search Tag"`
+	model.AuthorRequired
+	Name string `json:"name" dc:"标签名称"`
 }
 
-// GetTagListRes 获取标签列表响应
-type GetTagListRes struct {
+// SearchTagRes 搜索标签响应
+type SearchTagRes struct {
 	g.Meta `mime:"application/json"`
 	List   []*TagInfo `json:"list" dc:"标签列表"`
+	*model.PageRes
 }
 
 type TagInfo struct {

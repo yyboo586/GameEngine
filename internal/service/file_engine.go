@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type IFileEngine interface {
@@ -43,7 +45,7 @@ type fileEngine struct {
 func NewFileEngine() *fileEngine {
 	fileEngineOnce.Do(func() {
 		fileEngineInstance = &fileEngine{
-			addr:   "http://124.221.243.128:9700",
+			addr:   g.Cfg().MustGet(context.Background(), "server.thirdService.fileEngineService").String(),
 			client: common.NewHTTPClient(),
 		}
 	})

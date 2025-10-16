@@ -35,7 +35,7 @@ type adminService struct {
 
 func NewAdminService() IAdminService {
 	return &adminService{
-		address: g.Cfg().MustGet(context.Background(), "server.adminService.address").String(),
+		address: g.Cfg().MustGet(context.Background(), "server.thirdService.adminService").String(),
 		client:  common.NewHTTPClient(),
 	}
 }

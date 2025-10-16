@@ -8,6 +8,7 @@ import (
 	"GameEngine/internal/logics/ranking"
 	"GameEngine/internal/logics/recommendation"
 	"GameEngine/internal/logics/reservation"
+	"GameEngine/internal/model"
 	"GameEngine/internal/service"
 	"fmt"
 	"net/http"
@@ -25,15 +26,24 @@ func main() {
 	s.SetOpenApiPath("/api.json")
 	s.SetSwaggerPath("/swagger")
 
+	logicsGame := game.NewGame()
+	logicsAsyncTask := logics.NewAsyncTask()
+
 	service.RegisterAdminService(service.NewAdminService())
 	service.RegisterFileEngine()
-	service.RegisterGame(game.NewGame())
+	service.RegisterGame(logicsGame)
 	service.RegisterMetadata(metadata.NewMetadata())
 	service.RegisterRanking(ranking.NewRanking())
 	service.RegisterRecommendation(recommendation.NewRecommendation())
 	service.RegisterReservation(reservation.NewReservation())
 	service.RegisterUserBehavior(logics.NewUserBehavier())
 	service.RegisterMQ(service.NewMQ())
+	service.RegisterAsyncTask(logics.NewAsyncTask())
+
+	// 注册异步任务处理器
+	logicsAsyncTask.RegisterHandler(model.AsyncTaskTypeGameAutoPublish, logicsGame.HandleGameAutoPublish)
+	logicsAsyncTask.RegisterHandler(model.AsyncTaskTypeGameNotifyReservedUsers, logicsGame.NotifyReservedUsers)
+	logicsAsyncTask.Start()
 
 	s.Group("/api/v1/game-engine", func(group *ghttp.RouterGroup) {
 		group.Middleware(CORS)

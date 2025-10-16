@@ -6,8 +6,14 @@ import (
 	"GameEngine/internal/model/entity"
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"strings"
+)
+
+var (
+	ErrCategoryExists      = errors.New("分类已存在")
+	ErrCategoryNotExists   = errors.New("分类不存在")
+	ErrCategoryHasGameByID = errors.New("该分类有关联的游戏，无法删除")
 )
 
 func (m *metadata) CreateCategory(ctx context.Context, name string) (id int64, err error) {
@@ -18,7 +24,7 @@ func (m *metadata) CreateCategory(ctx context.Context, name string) (id int64, e
 	id, err = dao.Category.Ctx(ctx).Data(dataInsert).InsertAndGetId()
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			err = fmt.Errorf("分类名称已存在, name: %s", name)
+			err = ErrCategoryExists
 		}
 		return
 	}
@@ -26,9 +32,22 @@ func (m *metadata) CreateCategory(ctx context.Context, name string) (id int64, e
 	return
 }
 
+// 业务逻辑：
+// 1、检查分类是否存在
+// 2、检查分类是否有关联的游戏
+// 2.1 如果有，则返回错误
+// 2.2 如果没有，则删除分类
 func (m *metadata) DeleteCategory(ctx context.Context, id int64) (err error) {
 	if err = m.AssertCategoryExists(ctx, id); err != nil {
 		return
+	}
+
+	exists, err := m.IsCategoryHasGame(ctx, id)
+	if err != nil {
+		return
+	}
+	if exists {
+		return ErrCategoryHasGameByID
 	}
 
 	_, err = dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Delete()
@@ -48,7 +67,7 @@ func (m *metadata) UpdateCategory(ctx context.Context, id int64, name string) (e
 	_, err = dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Data(dataUpdate).Update()
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			err = fmt.Errorf("分类名称已存在, name: %s", name)
+			err = ErrCategoryExists
 		}
 		return
 	}
@@ -61,7 +80,7 @@ func (m *metadata) GetCategoryByID(ctx context.Context, id int64) (out *model.Ca
 	err = dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Scan(&category)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("分类不存在, id: %d", id)
+			return nil, ErrCategoryNotExists
 		}
 		return
 	}
@@ -70,9 +89,14 @@ func (m *metadata) GetCategoryByID(ctx context.Context, id int64) (out *model.Ca
 	return
 }
 
-func (m *metadata) ListCategory(ctx context.Context) (outs []*model.Category, err error) {
+// TODO:游戏分类暂时不会太多，所以直接返回所有分类，不做分页
+func (m *metadata) SearchCategory(ctx context.Context, name string) (outs []*model.Category, err error) {
 	var categories []*entity.Category
-	err = dao.Category.Ctx(ctx).Scan(&categories)
+	if name == "" {
+		err = dao.Category.Ctx(ctx).Scan(&categories)
+	} else {
+		err = dao.Category.Ctx(ctx).WhereLike(dao.Category.Columns().Name, name+"%").Scan(&categories)
+	}
 	if err != nil {
 		return
 	}
@@ -86,12 +110,12 @@ func (m *metadata) ListCategory(ctx context.Context) (outs []*model.Category, er
 }
 
 func (m *metadata) AssertCategoryExists(ctx context.Context, id int64) (err error) {
-	categoryInfo, err := m.GetCategoryByID(ctx, id)
+	exists, err := dao.Category.Ctx(ctx).Where(dao.Category.Columns().ID, id).Exist()
 	if err != nil {
 		return
 	}
-	if categoryInfo == nil {
-		return fmt.Errorf("分类不存在, id: %d", id)
+	if !exists {
+		return ErrCategoryNotExists
 	}
 	return
 }

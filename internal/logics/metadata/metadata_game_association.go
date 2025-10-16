@@ -14,6 +14,11 @@ import (
 
 // AddGameCategory 添加游戏分类关联
 func (m *metadata) AddGameCategory(ctx context.Context, tx gdb.TX, gameID, categoryID int64) (err error) {
+	err = m.AssertCategoryExists(ctx, categoryID)
+	if err != nil {
+		return
+	}
+
 	_, err = dao.GameCategory.Ctx(ctx).TX(tx).Insert(map[string]interface{}{
 		dao.GameCategory.Columns().GameID:     gameID,
 		dao.GameCategory.Columns().CategoryID: categoryID,
@@ -73,6 +78,14 @@ func (m *metadata) GetGameIDsByCategoryName(ctx context.Context, categoryName st
 	return
 }
 
+func (m *metadata) IsCategoryHasGame(ctx context.Context, categoryID int64) (bool, error) {
+	exists, err := dao.GameCategory.Ctx(ctx).Where(dao.GameCategory.Columns().CategoryID, categoryID).Exist()
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
 /*
 // GetCategoryGames 获取分类下的游戏列表
 func (m *metadata) GetCategoryGames(ctx context.Context, categoryID int64, pageReq *model.PageReq) (outs []*model.Game, pageRes *model.PageRes, err error) {
@@ -111,6 +124,17 @@ func (m *metadata) GetCategoryGames(ctx context.Context, categoryID int64, pageR
 
 // AddGameTags 添加游戏标签关联
 func (m *metadata) AddGameTags(ctx context.Context, tx gdb.TX, gameID int64, tagIDs []int64) (err error) {
+	for _, tagID := range tagIDs {
+		err = m.AssertTagExists(ctx, tagID)
+		if err != nil {
+			return
+		}
+	}
+
+	if len(tagIDs) == 0 {
+		return
+	}
+
 	dataInserts := make([]map[string]interface{}, 0, len(tagIDs))
 	for _, tagID := range tagIDs {
 		dataInserts = append(dataInserts, map[string]interface{}{
@@ -212,3 +236,11 @@ func (m *metadata) GetTagGames(ctx context.Context, tagID int64, pageReq *model.
 	return
 }
 */
+
+func (m *metadata) IsTagHasGame(ctx context.Context, tagID int64) (bool, error) {
+	exists, err := dao.GameTag.Ctx(ctx).Where(dao.GameTag.Columns().TagID, tagID).Exist()
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

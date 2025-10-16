@@ -28,9 +28,6 @@ func (rl *Reservation) ReserveGame(ctx context.Context, userID, gameID int64) er
 	if err != nil {
 		return err
 	}
-	if gameInfo == nil {
-		return fmt.Errorf("游戏不存在")
-	}
 
 	if gameInfo.Status != model.GameStatusPreRegister {
 		return fmt.Errorf("该游戏未开放预约")
@@ -162,12 +159,9 @@ func (rl *Reservation) IsUserReserved(ctx context.Context, userID, gameID int64)
 // GetGameReservations 根据游戏ID获取预约用户列表
 func (rl *Reservation) GetGameReservations(ctx context.Context, gameID int64) (outs []*model.ReservationUser, err error) {
 	// 检查游戏是否存在
-	gameInfo, err := service.Game().GetGameByID(ctx, gameID)
+	err = service.Game().AssertExists(ctx, gameID)
 	if err != nil {
 		return nil, err
-	}
-	if gameInfo == nil {
-		return nil, fmt.Errorf("游戏不存在")
 	}
 
 	// 获取预约用户列表

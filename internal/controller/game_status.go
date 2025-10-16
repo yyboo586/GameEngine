@@ -41,17 +41,13 @@ func (c *gameController) PublishGameImmediately(ctx context.Context, req *v1.Pub
 			g.Log().Errorf(ctx, "get game by id error: %v", err)
 			return
 		}
-		if gameInfo == nil {
-			g.Log().Errorf(ctx, "game not found")
-			return
-		}
+
 		users, err := service.Reservation().GetGameReservations(context.Background(), req.ID)
 		if err != nil {
 			g.Log().Errorf(ctx, "get game reservations error: %v", err)
 			return
 		}
 		if len(users) == 0 {
-			g.Log().Errorf(ctx, "no reservations found")
 			return
 		}
 
@@ -61,8 +57,9 @@ func (c *gameController) PublishGameImmediately(ctx context.Context, req *v1.Pub
 			userIDs = append(userIDs, fmt.Sprintf("%d", reservation.UserID))
 		}
 		body["user_ids"] = userIDs
-		body["content"] = map[string]string{
+		body["content"] = map[string]interface{}{
 			"title":     "游戏已发布",
+			"game_id":   gameInfo.ID,
 			"game_name": gameInfo.Name,
 			"message":   "游戏已发布，请登录游戏引擎查看",
 		}
@@ -103,5 +100,23 @@ func (c *gameController) ListInReview(ctx context.Context, req *v1.ListInReviewR
 		return nil, err
 	}
 
+	return
+}
+
+// 取消预约发布
+func (c *gameController) CancelPreRegister(ctx context.Context, req *v1.CancelPreRegisterReq) (res *v1.CancelPreRegisterRes, err error) {
+	err = service.Game().CancelPreRegisterGame(ctx, req.ID)
+	return
+}
+
+// 更新游戏信息（回到初始状态）
+func (c *gameController) UpdateGameInfo(ctx context.Context, req *v1.UpdateGameInfoReq) (res *v1.UpdateGameInfoRes, err error) {
+	err = service.Game().UpdateGameInfo(ctx, req.ID)
+	return
+}
+
+// 更新游戏版本（回到初始状态）
+func (c *gameController) UpdateGameVersion(ctx context.Context, req *v1.UpdateGameVersionReq) (res *v1.UpdateGameVersionRes, err error) {
+	err = service.Game().UpdateGameVersion(ctx, req.ID)
 	return
 }

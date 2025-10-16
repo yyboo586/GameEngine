@@ -38,12 +38,15 @@ CREATE TABLE IF NOT EXISTS `t_game` (
     `reserve_count` BIGINT(20) DEFAULT 0 COMMENT '预约次数',
     `download_count` BIGINT(20) DEFAULT 0 COMMENT '下载次数',
 
+    `version` INT(11) DEFAULT 0 COMMENT '并发版本控制',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_name` (`name`),
     KEY `idx_status_publish_time` (`status`, `publish_time`)
 ) ENGINE=InnoDB COMMENT='游戏表';
+
+ALTER TABLE `t_game` ADD COLUMN `version` INT(11) DEFAULT 0 COMMENT '并发版本控制' AFTER `download_count`;
 
 CREATE TABLE IF NOT EXISTS `t_game_media_info` (
     `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -66,7 +69,8 @@ CREATE TABLE IF NOT EXISTS `t_game_category` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_game_id_category_id` (`game_id`, `category_id`)
+    UNIQUE KEY `idx_game_id_category_id` (`game_id`, `category_id`),
+    KEY `idx_category_id` (`category_id`)
 ) ENGINE=InnoDB COMMENT='游戏分类表';
 
 CREATE TABLE IF NOT EXISTS `t_game_tag` (
@@ -76,7 +80,8 @@ CREATE TABLE IF NOT EXISTS `t_game_tag` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_game_id_tag_id` (`game_id`, `tag_id`)
+    UNIQUE KEY `idx_game_id_tag_id` (`game_id`, `tag_id`),
+    KEY `idx_tag_id` (`tag_id`)
 ) ENGINE=InnoDB COMMENT='游戏标签表';
 
 CREATE TABLE IF NOT EXISTS `t_game_favorite` (
@@ -174,3 +179,19 @@ INSERT INTO `t_game_tag` (`game_id`, `tag_id`) VALUES (6, 1), (6, 2), (6, 3), (6
 INSERT INTO `t_game_tag` (`game_id`, `tag_id`) VALUES (7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8);
 INSERT INTO `t_game_tag` (`game_id`, `tag_id`) VALUES (8, 1), (8, 2);
 
+CREATE TABLE IF NOT EXISTS `t_async_task` (
+  `id` BIGINT(20) AUTO_INCREMENT NOT NULL COMMENT '主键ID',
+  `custom_id` VARCHAR(40) DEFAULT '' COMMENT '自定义任务ID',
+  `task_type` TINYINT(1) NOT NULL COMMENT '任务类型',
+  `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '任务状态',
+  `retry_count` INT(11) NOT NULL DEFAULT 0 COMMENT '重试次数',
+  `content` TEXT NOT NULL COMMENT '任务内容',
+  `version` INT(11) NOT NULL DEFAULT 0 COMMENT '版本标识',
+  `next_retry_time` BIGINT(20) NOT NULL COMMENT '下次处理时间(默认等于创建时间)',
+  `create_time` BIGINT(20) NOT NULL COMMENT '创建时间',
+  `update_time` BIGINT(20) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_custom_id` (`custom_id`),
+  KEY `idx_type_status_time` (`task_type`, `status`, `next_retry_time`),
+  KEY `idx_status_time` (`status`, `next_retry_time`)
+) ENGINE=InnoDB COMMENT='异步任务表';

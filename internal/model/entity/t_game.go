@@ -20,6 +20,7 @@ type Game struct {
 	FavoriteCount int64 `orm:"favorite_count" dc:"收藏次数"`
 	DownloadCount int64 `orm:"download_count" dc:"下载次数"`
 
+	Version    int         `orm:"version" dc:"版本"`
 	CreateTime *gtime.Time `orm:"create_time" dc:"创建时间"`
 	UpdateTime *gtime.Time `orm:"update_time" dc:"更新时间"`
 }

@@ -50,14 +50,14 @@ func (c *metadata) GetTag(ctx context.Context, req *v1.GetTagReq) (res *v1.GetTa
 	return &v1.GetTagRes{TagInfo: c.convertTagModelToResponse(tag)}, nil
 }
 
-// ListTag 获取标签列表
-func (c *metadata) ListTag(ctx context.Context, req *v1.GetTagListReq) (res *v1.GetTagListRes, err error) {
-	outs, err := service.Metadata().ListTag(ctx)
+// SearchTag 搜索标签
+func (c *metadata) SearchTag(ctx context.Context, req *v1.SearchTagReq) (res *v1.SearchTagRes, err error) {
+	outs, err := service.Metadata().SearchTag(ctx, req.Name)
 	if err != nil {
 		return
 	}
 
-	res = &v1.GetTagListRes{
+	res = &v1.SearchTagRes{
 		List: make([]*v1.TagInfo, 0, len(outs)),
 	}
 	for _, out := range outs {

@@ -95,6 +95,14 @@ func (c *gameController) ReportDownloadResult(ctx context.Context, req *v1.Repor
 	return
 }
 
+func (c *gameController) SetH5Link(ctx context.Context, req *v1.SetH5LinkReq) (res *v1.SetH5LinkRes, err error) {
+	err = service.Game().SetH5Link(ctx, req.GameID, req.Link)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (c *gameController) SaveMediaInfo(ctx context.Context, req *v1.SaveMediaInfoReq) (res *v1.SaveMediaInfoRes, err error) {
 	mediaInfos := make([]*model.GameMediaInfo, 0)
 	for _, info := range req.MediaInfos {

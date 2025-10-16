@@ -8,7 +8,7 @@ import (
 
 type PreUploadMediaInfoReq struct {
 	g.Meta `path:"/games/{game_id}/media-info/pre-upload" method:"post" tags:"Game Management/MediaInfo" summary:"Pre Upload"`
-	model.Author
+	model.AuthorRequired
 	GameID      int64  `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	Type        int    `json:"type" v:"required#文件类型不能为空" dc:"文件类型(1:图标,2:截图,3:视频,4:APK文件)"`
 	FileName    string `json:"file_name" v:"required#文件名称不能为空" dc:"文件名称"`
@@ -25,7 +25,7 @@ type PreUploadMediaInfoRes struct {
 
 type ReportUploadResult struct {
 	g.Meta `mime:"application/json" path:"/games/{game_id}/media-info/upload-result" method:"post" tags:"Game Management/MediaInfo" summary:"Report Upload Result"`
-	model.Author
+	model.AuthorRequired
 	GameID  int64  `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	FileID  string `json:"file_id" v:"required#文件ID不能为空" dc:"文件ID"`
 	Success bool   `json:"success" v:"required#上传结果不能为空" dc:"上传结果"`
@@ -37,7 +37,7 @@ type ReportUploadResultRes struct {
 
 type PreDownloadMediaInfoReq struct {
 	g.Meta `path:"/games/{game_id}/media-info/pre-download" method:"post" tags:"Game Management/MediaInfo" summary:"Pre Download"`
-	model.Author
+	model.AuthorRequired
 	GameID int64  `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	FileID string `json:"fileID" v:"required#文件ID不能为空" dc:"文件ID"`
 }
@@ -51,7 +51,7 @@ type PreDownloadMediaInfoRes struct {
 
 type ReportDownloadResult struct {
 	g.Meta `mime:"application/json" path:"/games/{game_id}/media-info/download-result" method:"post" tags:"Game Management/MediaInfo" summary:"Report Download Result"`
-	model.Author
+	model.AuthorRequired
 	GameID  int64  `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	FileID  string `json:"file_id" v:"required#文件ID不能为空" dc:"文件ID"`
 	Success bool   `json:"success" v:"required#下载结果不能为空" dc:"下载结果"`
@@ -61,9 +61,19 @@ type ReportDownloadResultRes struct {
 	g.Meta `mime:"application/json"`
 }
 
+type SetH5LinkReq struct {
+	g.Meta `path:"/games/{game_id}/media-info/set-h5-link" method:"post" tags:"Game Management/MediaInfo" summary:"Set H5 Link"`
+	model.AuthorRequired
+	GameID int64  `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
+	Link   string `json:"link" v:"required#链接不能为空" dc:"链接"`
+}
+type SetH5LinkRes struct {
+	g.Meta `mime:"application/json"`
+}
+
 type SaveMediaInfoReq struct {
 	g.Meta `path:"/games/{game_id}/media-info/save" method:"post" tags:"Game Management/MediaInfo" summary:"Save Game Media Info"`
-	model.Author
+	model.AuthorRequired
 	GameID     int64            `p:"game_id" v:"required#游戏ID不能为空" dc:"游戏ID"`
 	MediaInfos []*GameMediaInfo `json:"media_infos" v:"required#媒体信息不能为空" dc:"媒体信息"`
 }

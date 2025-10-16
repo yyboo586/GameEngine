@@ -1,7 +1,11 @@
 package model
 
-type Author struct {
+type AuthorRequired struct {
 	Authorization string `p:"Authorization" in:"header" v:"required#Authorization不能为空" dc:"Bearer {{token}}"`
+}
+
+type AuthorNotRequired struct {
+	Authorization string `p:"Authorization" in:"header" dc:"Bearer {{token}}"`
 }
 
 type PageReq struct {

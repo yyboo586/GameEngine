@@ -50,14 +50,14 @@ func (c *metadata) GetCategory(ctx context.Context, req *v1.GetCategoryReq) (res
 	return &v1.GetCategoryRes{CategoryInfo: c.convertCategoryModelToResponse(category)}, nil
 }
 
-// ListCategory 获取分类列表
-func (c *metadata) ListCategory(ctx context.Context, req *v1.GetCategoryListReq) (res *v1.GetCategoryListRes, err error) {
-	outs, err := service.Metadata().ListCategory(ctx)
+// SearchCategory 搜索分类
+func (c *metadata) SearchCategory(ctx context.Context, req *v1.SearchCategoryReq) (res *v1.SearchCategoryRes, err error) {
+	outs, err := service.Metadata().SearchCategory(ctx, req.Name)
 	if err != nil {
 		return
 	}
 
-	res = &v1.GetCategoryListRes{
+	res = &v1.SearchCategoryRes{
 		List: make([]*v1.CategoryInfo, 0, len(outs)),
 	}
 	for _, out := range outs {

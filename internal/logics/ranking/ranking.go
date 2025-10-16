@@ -6,7 +6,6 @@ import (
 	"GameEngine/internal/model/entity"
 	"GameEngine/internal/service"
 	"context"
-	"fmt"
 	"sort"
 	"time"
 )
@@ -392,10 +391,6 @@ func (rl *Ranking) GetRelatedGames(ctx context.Context, gameID int64, pageReq *m
 	// 获取目标游戏信息
 	targetGame, err := service.Game().GetGameByID(ctx, gameID)
 	if err != nil {
-		return
-	}
-	if targetGame == nil {
-		err = fmt.Errorf("游戏不存在")
 		return
 	}
 

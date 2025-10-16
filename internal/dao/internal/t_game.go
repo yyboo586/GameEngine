@@ -32,8 +32,10 @@ type GameColumns struct {
 	RatingScore   string // 评分总分
 	RatingCount   string // 评分次数
 	DownloadCount string // 下载次数
-	CreateTime    string // 创建时间
-	UpdateTime    string // 更新时间
+
+	Version    string // 版本
+	CreateTime string // 创建时间
+	UpdateTime string // 更新时间
 }
 
 // gameColumns holds the columns for table t_game.
@@ -54,8 +56,10 @@ var gameColumns = GameColumns{
 	RatingScore:   "rating_score",
 	RatingCount:   "rating_count",
 	DownloadCount: "download_count",
-	CreateTime:    "create_time",
-	UpdateTime:    "update_time",
+
+	Version:    "version",
+	CreateTime: "create_time",
+	UpdateTime: "update_time",
 }
 
 // NewGameTagDao creates and returns a new DAO object for table data access.
